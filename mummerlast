@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# In 2019 written by Marjolein Hooykaas
+# Goal of script: mummer (nucmer) can be used to align two multi-fasta files and plot results. Sometimes it is convenient to 'zoom in' to only smaller contigs. The below script does this, if contigs are sorted large -> small.
+# Make mummerplot (PNG) of alignment of fasta files $1 and $2 (reference and query) but only print the last $3 and $4 files of the multifasta files; optionally plot SNPs
+# If SNPs should be indicated: add --SNP (as $5)
+# Also run show-coords on filtered delta file
+# Depencies: bioawk and mummer
+# How to call: # mummerlast file1.fasta file2.fasta nlastcontigs1 nlastcontigs2 [--SNP]
+
+n1=$(expr $3 \* 2)    # n1 = number of lines to be written: $3 * 2 (1.sequence name & 2.sequence); use of bioawk will result sequences being transformed to a single line (insted of spread across multiple)
+n2=`expr $4 \* 2`
+
+bioawk -c fastx '{print ">"$name; print $seq}' $1 | tail -n $n1 > file1.fasta   # select first n1 files from multi-fasta file; write to temporary file; 
+bioawk -c fastx '{print ">"$name; print $seq}' $2 | tail -n $n2 > file2.fasta   # select first n2 files
+
+filename=$(basename $1)_vs_$(basename $2)    # include filenames in output to be somewhat specific; however, plot will be overwritten if the same two fasta files are run again
+nucmer file1.fasta file2.fasta -p $filename
+delta-filter -m $filename.delta > mout.delta
+show-coords -rc mout.delta
+mummerplot -p $filename -t png $5 mout.delta
+rm file1.fasta
+rm file2.fasta
