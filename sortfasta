@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# to sort fasta sequences of a multi-fasta file by size, from large to small (typically an assembly consisting of different-sized contigs
+
+cat $1 | bioawk -c fastx '{print length($seq)"\t"">"$name"##"$seq}' | sort -rn | awk -F '\t' {'print $2'} | sed 's/##/\n/' > $(echo $1 | sed 's/.fasta//')_sorted.fasta
+
