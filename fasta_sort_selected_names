@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# to sort sequences of a multi-fasta file based on a file listing their names in desired order
+# usage: fasta_sort_selected_names sequences.fasta id-list.txt
+# input1: multi-fasta file [alternating headers (>name description like | so | or so) and sequence]
+# input2: text file with list of id's: every line should contain one id
+# output will be the elements of the input fasta reordered based on id-list "originalname-reordered.fasta"
+# elements in multi-fasta that are not listed in the id-list will be missing from the output fasta
+
+fasta="$1"
+idlist="$2"
+filename=$(basename $fasta | sed 's/\..*//')
+echo processing $filename...
+while read line
+  do
+     bioawk -c fastx -v line="$line" '($name==line || $name" "$comment==line) {print ">"$name$comment"\n"$seq}' $fasta > $filename-reordered.fasta
+     echo search for \"$line\"
+  done < $idlist

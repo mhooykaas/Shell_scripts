@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# to split a multi-fasta assembly into individual contigs
+# rename to contig1.fasta - contign.fasta
+# usage: bash splitfasta assembly.fasta
+
+c=1
+for part in $(cat $1 | bioawk -c fastx '{print ">"$name"##"$seq}')
+do
+	echo $part | sed 's/##/\n/' > contig$c.fasta
+	c=$(($c + 1))
+done

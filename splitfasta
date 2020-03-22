@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# to split a multi-fasta file into individual fasta files (eg an assembly into 1 file per contig)
+# to split a multi-fasta file into individual fasta files
+# names should consist only of characters [a-zA-Z0-9_.]
 # usage: bash splitfasta assembly.fasta
 
-c=1
 for part in $(cat $1 | bioawk -c fastx '{print ">"$name"##"$seq}')
 do
-	echo $part | sed 's/##/\n/' > contig$c.fasta
-	c=$(($c + 1))
+	name=$(echo $part | egrep -o '>.*#' | egrep -o [a-zA-Z0-9_.]+)
+	echo $name
+	echo $part | sed 's/##/\n/' > $name.fasta
 done
